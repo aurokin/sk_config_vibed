@@ -25,8 +25,8 @@ function Convert-ToHashtableFromArray {
   return $map
 }
 
-[CmdletBinding(SupportsShouldProcess = $true)]
 function Update-IniFileByPartialKey {
+    [CmdletBinding(SupportsShouldProcess = $true)]
   param(
     [Parameter(Mandatory = $true)][string]$Path,
     [Parameter(Mandatory = $true)][hashtable]$KeyValues
@@ -60,7 +60,7 @@ function Update-IniFileByPartialKey {
 
     if ($index -ge 0) {
       if ($lines[$index] -ne $newLine) {
-        Write-Verbose "Replacing line $index: '$($lines[$index])' -> '$newLine'"
+        Write-Verbose "Replacing line $index : '$($lines[$index])' -> '$newLine'"
         $lines[$index] = $newLine
         $changed = $true
       } else {
