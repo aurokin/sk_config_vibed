@@ -3,10 +3,7 @@ Param(
   [string]$ProfileName,
 
   [Parameter(Mandatory = $false, Position = 1)]
-  [string]$ConfigPath,
-
-  [Parameter(Mandatory = $false)]
-  [string]$ProfileFolder
+  [string]$ConfigPath
 )
 
 $ErrorActionPreference = 'Stop'
@@ -114,20 +111,18 @@ try {
   }
 
   $profilePairs = Get-NotePropertiesHashtable -Object $profileSection
-
-  if ([string]::IsNullOrWhiteSpace($ProfileFolder)) {
-    if ($null -ne $profileData.PSObject.Properties['profileFolder']) {
-      $ProfileFolder = [string]$profileData.profileFolder
-    } elseif ($null -ne $profileSection -and $null -ne $profileSection.PSObject.Properties['folder']) {
-      $ProfileFolder = [string]$profileSection.folder
-      if ($profilePairs.ContainsKey('folder')) { $profilePairs.Remove('folder') }
-    } else {
-      $ProfileFolder = $ProfileName
-    }
+  $profileFolder = $null
+  if ($null -ne $profileData.PSObject.Properties['profileFolder']) {
+    $profileFolder = [string]$profileData.profileFolder
+  } elseif ($null -ne $profileSection -and $null -ne $profileSection.PSObject.Properties['folder']) {
+    $profileFolder = [string]$profileSection.folder
+    if ($profilePairs.ContainsKey('folder')) { $profilePairs.Remove('folder') }
+  } else {
+    $profileFolder = $ProfileName
   }
 
   if ($profilePairs.Count -gt 0) {
-    $profileIni = Join-Path (Join-Path $profilesRoot $ProfileFolder) 'SpecialK.ini'
+    $profileIni = Join-Path (Join-Path $profilesRoot $profileFolder) 'SpecialK.ini'
     Update-IniFileLines -Path $profileIni -KeyValues $profilePairs
   }
 
