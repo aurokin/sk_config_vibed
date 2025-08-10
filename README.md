@@ -14,14 +14,14 @@ A tiny PowerShell script that updates Special K INI settings from a JSON profile
 - PowerShell 7+ (`pwsh`) recommended
 
 ## 🚀 Quick Start
-1) Copy the example and edit values:
+1) Copy the example and edit values (the script reads `config.json` next to the script by default):
    `cp config.example.json config.json`
 2) Dry-run first (no changes):
    `pwsh -File sk_config.ps1 240hz_vrr -WhatIf -Verbose`
 3) Apply changes:
    `pwsh -File sk_config.ps1 240hz_vrr`
 
-Use a custom config path with `-ConfigPath`:
+Use a custom config path with `-ConfigPath` (overrides the default script-directory lookup):
 `pwsh -File sk_config.ps1 144hz_vrr -ConfigPath .\\myconfig.json -Verbose`
 
 ## 🧰 Config Format
@@ -64,4 +64,3 @@ Values are written exactly as strings into INI lines like `Key=Value`.
 - Backup your INIs before large changes.
 
 Enjoy smoother profiles! 🕹️💨
-

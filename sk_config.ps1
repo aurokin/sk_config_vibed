@@ -89,7 +89,15 @@ function Update-IniFileByPartialKey {
 
 try {
   if (-not $PSBoundParameters.ContainsKey('ConfigPath') -or [string]::IsNullOrWhiteSpace($ConfigPath)) {
-    $ConfigPath = Join-Path -Path (Get-Location) -ChildPath 'config.json'
+    # Resolve default config next to the script location, not the current directory
+    $scriptDir = if ($PSScriptRoot) {
+      $PSScriptRoot
+    } elseif ($PSCommandPath) {
+      Split-Path -Parent $PSCommandPath
+    } else {
+      Split-Path -Parent $MyInvocation.MyCommand.Path
+    }
+    $ConfigPath = Join-Path -Path $scriptDir -ChildPath 'config.json'
   }
   if (-not (Test-Path -Path $ConfigPath)) {
     throw "Config file not found: $ConfigPath"
