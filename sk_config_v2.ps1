@@ -109,11 +109,10 @@ try {
   $basePath = Join-Path $env:LOCALAPPDATA 'Programs\Special K'
   $globalIni = Join-Path $basePath 'Global\osd.ini'
   $profilesRoot = Join-Path $basePath 'Profiles'
-  $profileIni = Join-Path (Join-Path $profilesRoot $ProfileName) 'SpecialK.ini'
 
   Write-Verbose "Base path: $basePath"
   Write-Verbose "Global INI: $globalIni"
-  Write-Verbose "Profile INI: $profileIni"
+  Write-Verbose "Profiles root: $profilesRoot"
 
   if ($globalPairs.Count -gt 0) {
     Update-IniFileByPartialKey -Path $globalIni -KeyValues $globalPairs -Verbose:$VerbosePreference -WhatIf:$WhatIfPreference
@@ -122,7 +121,18 @@ try {
   }
 
   if ($profilePairs.Count -gt 0) {
-    Update-IniFileByPartialKey -Path $profileIni -KeyValues $profilePairs -Verbose:$VerbosePreference -WhatIf:$WhatIfPreference
+    $profileIniFiles = @()
+    if (Test-Path -Path $profilesRoot) {
+      $profileIniFiles = Get-ChildItem -Path $profilesRoot -Filter 'SpecialK.ini' -Recurse -File | Select-Object -ExpandProperty FullName
+    }
+    if ($profileIniFiles.Count -eq 0) {
+      Write-Host "No 'SpecialK.ini' files found under: $profilesRoot"
+    } else {
+      foreach ($iniPath in $profileIniFiles) {
+        Write-Verbose "Updating profile INI: $iniPath"
+        Update-IniFileByPartialKey -Path $iniPath -KeyValues $profilePairs -Verbose:$VerbosePreference -WhatIf:$WhatIfPreference
+      }
+    }
   } else {
     Write-Host "No profile settings for '$ProfileName'"
   }
