@@ -8,7 +8,7 @@
 ## Build, Test, and Development Commands
 - Run (PowerShell 7+): `pwsh -File sk_config.ps1 <ProfileName> [-ConfigPath <path>]`
 - Dry run: add `-WhatIf` to preview writes; add `-Verbose` for detailed logs.
-- Windows example: `pwsh -File sk_config.ps1 Gaming -ConfigPath .\config.json -WhatIf -Verbose`
+- Windows example: `pwsh -File sk_config.ps1 240hz_vrr -ConfigPath .\\config.json -WhatIf -Verbose`
 - Default config path: `./config.json` if `-ConfigPath` not provided.
 
 ## Coding Style & Naming Conventions
@@ -21,9 +21,9 @@
 ## Testing Guidelines
 - No unit tests. Validate changes with `-WhatIf` and `-Verbose`.
 - Create a minimal `config.json` locally (not committed):
-  `{ "Gaming": { "global": [{"key":"OSD.Enabled","value":"true"}], "profile": [] } }`
+  `{ "240hz_vrr": { "global": [{"key":"FontScale","value":"1.0"}], "profile": [{"key":"TargetFPS","value":"222.872238"},{"key":"LimitEnforcementPolicy","value":"4"}] } }`
 - Verify expected targets exist:
-  `%LOCALAPPDATA%\Programs\Special K\Global\osd.ini` and `...\Profiles\**\SpecialK.ini`.
+  `%LOCALAPPDATA%\\Programs\\Special K\\Global\\osd.ini` and `...\\Profiles\\**\\SpecialK.ini`.
 
 ## Commit & Pull Request Guidelines
 - Commits: concise, imperative mood (e.g., "Update INI write logic").
@@ -37,5 +37,5 @@
 ## Security & Configuration Tips
 - Do not commit `config.json` (ignored by `.gitignore`). Consider attaching a redacted snippet in PRs when needed.
 - Use `-WhatIf` before running on real profiles to prevent accidental edits.
-- The script edits INI files under `%LOCALAPPDATA%\Programs\Special K`; ensure you have backups or versioned copies.
+- The script edits INI files under `%LOCALAPPDATA%\\Programs\\Special K`; ensure you have backups or versioned copies.
 
