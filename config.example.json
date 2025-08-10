@@ -1,0 +1,20 @@
+{
+  "240hz_vrr": {
+    "global": [
+      { "key": "FontScale", "value": "1.0" }
+    ],
+    "profile": [
+      { "key": "TargetFPS", "value": "222.872238" },
+      { "key": "LimitEnforcementPolicy", "value": "4" }
+    ]
+  },
+  "144hz_vrr": {
+    "global": [
+      { "key": "FontScale", "value": "1.5" }
+    ],
+    "profile": [
+      { "key": "TargetFPS", "value": "137.000000" },
+      { "key": "LimitEnforcementPolicy", "value": "4" }
+    ]
+  }
+}
