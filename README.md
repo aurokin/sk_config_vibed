@@ -43,7 +43,7 @@ See `config.example.json` for a full example. Each top-level property is a profi
       { "key": "LimitEnforcementPolicy", "value": "4" }
     ]
   },
-  "120hz_stream": {
+  "apollo_5A900E30-EDB2-6C28-770D-BB4AEE67B196": {
     "global": [{ "key": "FontScale", "value": "2.0" }],
     "profile": [
       { "key": "TargetFPS", "value": "120.000000" },

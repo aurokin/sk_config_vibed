@@ -8,8 +8,14 @@ Param(
 )
 
 $ErrorActionPreference = 'Stop'
+
+# Apollo Integration
 $apolloFPS = $env:APOLLO_CLIENT_FPS
 $apolloStatus = $env:APOLLO_APP_STATUS
+$apolloUUID = $env:APOLLO_CLIENT_UUID
+if ($ProfileName -eq 'apollo_dynamic' -and $apolloUUID -ne $null) {
+ $ProfileName = "apollo_$apolloUUID"
+}
 
 function Convert-ToHashtableFromArray {
   param(
