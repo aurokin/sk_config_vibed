@@ -88,3 +88,23 @@ Notes
 - If `APOLLO_CLIENT_FPS` is unset or empty, no override occurs.
 - If `APOLLO_APP_STATUS` is `TERMINATING`, no override occurs even if `APOLLO_CLIENT_FPS` is set.
 - `-Verbose` logs show the final value processed for `TargetFPS` after any override.
+
+## 🔁 Dynamic Apollo Profile
+Some orchestrations provide a per-device UUID. The script supports a special dynamic profile name to target device-specific profiles without changing your invocation.
+
+- Special name: `apollo_dynamic`
+- UUID variable: `APOLLO_CLIENT_UUID` → `$apolloUUID`
+
+Behavior
+- When invoked with profile `apollo_dynamic` and `APOLLO_CLIENT_UUID` is set, the script rewrites the profile name to `apollo_<UUID>` before reading `config.json`.
+- Example mapping: if `APOLLO_CLIENT_UUID=5A900E30-EDB2-6C28-770D-BB4AEE67B196`, then `apollo_dynamic` resolves to `apollo_5A900E30-EDB2-6C28-770D-BB4AEE67B196`.
+
+Usage Examples
+- Windows (PowerShell):
+  - ``$env:APOLLO_CLIENT_UUID='5A900E30-EDB2-6C28-770D-BB4AEE67B196'; pwsh -File sk_config.ps1 apollo_dynamic -Verbose``
+- Cross-platform (pwsh/macOS/Linux):
+  - ``APOLLO_CLIENT_UUID=5A900E30-EDB2-6C28-770D-BB4AEE67B196 pwsh -File sk_config.ps1 apollo_dynamic``
+
+Notes
+- Ensure your `config.json` contains a matching per-device profile key like `"apollo_<UUID>"`.
+- If `APOLLO_CLIENT_UUID` is not set, `apollo_dynamic` will not resolve and the script will look for a profile literally named `apollo_dynamic`.
