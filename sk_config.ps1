@@ -43,9 +43,9 @@ function Update-IniFileByPartialKey {
 
   foreach ($key in $KeyValues.Keys) {
     $value = $KeyValues[$key]
-        if ($key -eq "TargetFPS" -and $apolloFPS -ne $null) {
-            $value = $apolloFPS
-        }
+    if ($key -eq "TargetFPS" -and $apolloFPS -ne $null) {
+      $value = $apolloFPS
+    }
     $newLine = "$key=$value"
     Write-Verbose "Processing key '$key' with value '$value' in '$Path'"
     $exactPattern = '^[\s;#]*' + [regex]::Escape($key) + '\s*='
