@@ -4,7 +4,10 @@ Param(
   [string]$ProfileName,
 
   [Parameter(Mandatory = $false, Position = 1)]
-  [string]$ConfigPath
+  [string]$ConfigPath,
+
+  [Parameter(Mandatory = $false)]
+  [switch]$apollo
 )
 
 $ErrorActionPreference = 'Stop'
@@ -13,9 +16,6 @@ $ErrorActionPreference = 'Stop'
 $apolloFPS = $env:APOLLO_CLIENT_FPS
 $apolloStatus = $env:APOLLO_APP_STATUS
 $apolloUUID = $env:APOLLO_CLIENT_UUID
-if ($ProfileName -eq 'apollo_dynamic' -and $apolloUUID -ne $null) {
- $ProfileName = "apollo_$apolloUUID"
-}
 
 function Convert-ToHashtableFromArray {
   param(
@@ -27,6 +27,9 @@ function Convert-ToHashtableFromArray {
     if ($null -ne $item -and $item.PSObject.Properties.Name -contains 'key') {
       $k = [string]$item.key
       $v = if ($item.PSObject.Properties.Name -contains 'value') { [string]$item.value } else { '' }
+      if ($apollo -and $k -eq "TargetFPS" -and $apolloFPS -ne $null -and $apolloStatus -ne 'TERMINATING') {
+        $v = $apolloFPS
+      }
       $map[$k] = $v
     }
   }
@@ -50,9 +53,6 @@ function Update-IniFileByPartialKey {
 
   foreach ($key in $KeyValues.Keys) {
     $value = $KeyValues[$key]
-    if ($key -eq "TargetFPS" -and $apolloFPS -ne $null -and $apolloStatus -ne 'TERMINATING') {
-      $value = $apolloFPS
-    }
     $newLine = "$key=$value"
     Write-Verbose "Processing key '$key' with value '$value' in '$Path'"
     $exactPattern = '^[\s;#]*' + [regex]::Escape($key) + '\s*='
@@ -116,6 +116,12 @@ try {
 
   $jsonRaw = Get-Content -Path $ConfigPath -Raw
   $config = $jsonRaw | ConvertFrom-Json
+
+  if ($apollo -and $apolloUUID -ne $null) {
+    $apolloProfileName = "apollo_$apolloUUID"
+    $testNode = $config.PSObject.Properties[$apolloProfileName]
+    if ($null -ne $testNode) { $ProfileName = $apolloProfileName }
+  }
 
   $profileNode = $config.PSObject.Properties[$ProfileName].Value
   if ($null -eq $profileNode) {
