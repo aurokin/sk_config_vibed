@@ -92,6 +92,7 @@ Notes
 - If `APOLLO_CLIENT_FPS` is unset or empty, no override occurs.
 - If `APOLLO_APP_STATUS` is `TERMINATING`, no override occurs even if `APOLLO_CLIENT_FPS` is set.
 - `-Verbose` logs show the final value processed for `TargetFPS` after any override.
+- You must pass a profile name even with device profiles. The positional `ProfileName` argument is required for the script to run and also serves as the default/fallback profile if an `apollo_<UUID>` profile is not found.
 
 ## 🔁 Dynamic Apollo Profile
 Some orchestrations provide a per-device UUID. With `-apollo`, the script can automatically select a device-specific profile without changing your invocation.
@@ -111,3 +112,4 @@ Usage Examples
 Notes
 - Ensure your `config.json` contains a matching per-device profile key like `"apollo_<UUID>"`.
 - If `APOLLO_CLIENT_UUID` is not set or no matching profile exists, the originally provided `ProfileName` is used.
+- Default profile required: When using `-apollo`, keep at least one non-device default profile to fall back to. You will always need at minimum one more profile than the number of device-specific `apollo_<UUID>` profiles you have.
