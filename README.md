@@ -24,6 +24,9 @@ A tiny PowerShell script that updates Special K INI settings from a JSON profile
 Use a custom config path with `-ConfigPath` (overrides the default script-directory lookup):
 `pwsh -File sk_config.ps1 144hz_vrr -ConfigPath .\\myconfig.json -Verbose`
 
+Enable Apollo integrations (env overrides and dynamic profile):
+`pwsh -File sk_config.ps1 240hz_vrr -apollo -Verbose`
+
 ## 🧰 Config Format
 See `config.example.json` for a full example. Each top-level property is a profile name. Profiles contain two arrays of key/value pairs:
 
@@ -68,43 +71,43 @@ Values are written exactly as strings into INI lines like `Key=Value`.
 
 Enjoy smoother profiles! 🕹️💨
 
-## 🌐 Environment Overrides (Apollo)
-For runtime-controlled FPS caps, the script can override `TargetFPS` using environment variables commonly provided by an external orchestrator ("Apollo").
+## 🌐 Apollo Mode (Environment Overrides)
+For runtime-controlled FPS caps, Apollo integrations are now opt-in and gated by the `-apollo` switch.
 
 - `APOLLO_CLIENT_FPS` → `$apolloFPS`: When set, this value replaces any `TargetFPS` from `config.json`.
 - `APOLLO_APP_STATUS` → `$apolloStatus`: When set to `TERMINATING` (case-insensitive), the override is disabled to avoid last‑minute changes.
 
 Behavior
-- If `APOLLO_CLIENT_FPS` is set and `APOLLO_APP_STATUS` is not `TERMINATING`, `TargetFPS` is written using `APOLLO_CLIENT_FPS`.
+- When `-apollo` is supplied and `APOLLO_CLIENT_FPS` is set and `APOLLO_APP_STATUS` is not `TERMINATING`, `TargetFPS` is written using `APOLLO_CLIENT_FPS`.
 - Applies to both Global `osd.ini` and all `SpecialK.ini` files under Profiles.
 
 Examples
 - Windows (PowerShell):
-  - ``$env:APOLLO_CLIENT_FPS = '240'; $env:APOLLO_APP_STATUS = 'RUNNING'; pwsh -File sk_config.ps1 240hz_vrr -Verbose``
+  - ``$env:APOLLO_CLIENT_FPS='240'; $env:APOLLO_APP_STATUS='RUNNING'; pwsh -File sk_config.ps1 240hz_vrr -apollo -Verbose``
 - Cross-platform (pwsh/macOS/Linux):
-  - ``APOLLO_CLIENT_FPS=144 APOLLO_APP_STATUS=RUNNING pwsh -File sk_config.ps1 144hz_vrr -Verbose``
+  - ``APOLLO_CLIENT_FPS=144 APOLLO_APP_STATUS=RUNNING pwsh -File sk_config.ps1 144hz_vrr -apollo -Verbose``
 
 Notes
+- Apollo overrides do not occur unless `-apollo` is passed.
 - If `APOLLO_CLIENT_FPS` is unset or empty, no override occurs.
 - If `APOLLO_APP_STATUS` is `TERMINATING`, no override occurs even if `APOLLO_CLIENT_FPS` is set.
 - `-Verbose` logs show the final value processed for `TargetFPS` after any override.
 
 ## 🔁 Dynamic Apollo Profile
-Some orchestrations provide a per-device UUID. The script supports a special dynamic profile name to target device-specific profiles without changing your invocation.
+Some orchestrations provide a per-device UUID. With `-apollo`, the script can automatically select a device-specific profile without changing your invocation.
 
-- Special name: `apollo_dynamic`
 - UUID variable: `APOLLO_CLIENT_UUID` → `$apolloUUID`
 
 Behavior
-- When invoked with profile `apollo_dynamic` and `APOLLO_CLIENT_UUID` is set, the script rewrites the profile name to `apollo_<UUID>` before reading `config.json`.
-- Example mapping: if `APOLLO_CLIENT_UUID=5A900E30-EDB2-6C28-770D-BB4AEE67B196`, then `apollo_dynamic` resolves to `apollo_5A900E30-EDB2-6C28-770D-BB4AEE67B196`.
+- When `-apollo` is supplied and `APOLLO_CLIENT_UUID` is set, the script will prefer a profile named `apollo_<UUID>` if it exists in `config.json`. If found, it overrides the provided `ProfileName`.
+- Example: if `APOLLO_CLIENT_UUID=5A900E30-EDB2-6C28-770D-BB4AEE67B196` and `config.json` contains `"apollo_5A900E30-EDB2-6C28-770D-BB4AEE67B196"`, that profile is selected even if you invoked `240hz_vrr`.
 
 Usage Examples
 - Windows (PowerShell):
-  - ``$env:APOLLO_CLIENT_UUID='5A900E30-EDB2-6C28-770D-BB4AEE67B196'; pwsh -File sk_config.ps1 apollo_dynamic -Verbose``
+  - ``$env:APOLLO_CLIENT_UUID='5A900E30-EDB2-6C28-770D-BB4AEE67B196'; pwsh -File sk_config.ps1 240hz_vrr -apollo -Verbose``
 - Cross-platform (pwsh/macOS/Linux):
-  - ``APOLLO_CLIENT_UUID=5A900E30-EDB2-6C28-770D-BB4AEE67B196 pwsh -File sk_config.ps1 apollo_dynamic``
+  - ``APOLLO_CLIENT_UUID=5A900E30-EDB2-6C28-770D-BB4AEE67B196 pwsh -File sk_config.ps1 144hz_vrr -apollo``
 
 Notes
 - Ensure your `config.json` contains a matching per-device profile key like `"apollo_<UUID>"`.
-- If `APOLLO_CLIENT_UUID` is not set, `apollo_dynamic` will not resolve and the script will look for a profile literally named `apollo_dynamic`.
+- If `APOLLO_CLIENT_UUID` is not set or no matching profile exists, the originally provided `ProfileName` is used.

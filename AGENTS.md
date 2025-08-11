@@ -6,7 +6,7 @@
 - No external assets or test suite. Git tracks only the script and `.gitignore`.
 
 ## Build, Test, and Development Commands
-- Run (PowerShell 7+): `pwsh -File sk_config.ps1 <ProfileName> [-ConfigPath <path>]`
+- Run (PowerShell 7+): `pwsh -File sk_config.ps1 <ProfileName> [-ConfigPath <path>] [-apollo]`
 - Dry run: add `-WhatIf` to preview writes; add `-Verbose` for detailed logs.
 - Windows example: `pwsh -File sk_config.ps1 240hz_vrr -ConfigPath .\\config.json -WhatIf -Verbose`
 - Default config path: `./config.json` if `-ConfigPath` not provided.
@@ -41,30 +41,33 @@
 
 ## Apollo Environment Overrides
 - Purpose: Allow external orchestration to dynamically override `TargetFPS` without changing `config.json`.
+- Gating: Apollo behavior is opt-in via the `-apollo` switch.
 - Variables:
   - `$apolloFPS` (from env `APOLLO_CLIENT_FPS`): When set, replaces any `TargetFPS` value being written.
   - `$apolloStatus` (from env `APOLLO_APP_STATUS`): Guards overrides; when status is `TERMINATING` (case-insensitive), the override is skipped.
 - Behavior:
-  - In `Update-IniFileByPartialKey`, when `key == "TargetFPS"` and `$apolloFPS` is non-null and `$apolloStatus` is not `TERMINATING`, the script writes `$apolloFPS` as the value.
+  - When `-apollo` is supplied and `APOLLO_CLIENT_FPS` is set and status is not `TERMINATING`, the script writes `$apolloFPS` for `TargetFPS`.
   - Applies to both Global `osd.ini` and per-profile `SpecialK.ini` writes.
 - Examples:
-  - Windows (PowerShell): ``$env:APOLLO_CLIENT_FPS = '240'; $env:APOLLO_APP_STATUS = 'RUNNING'; pwsh -File sk_config.ps1 240hz_vrr -Verbose``
-  - Cross-platform (pwsh): ``APOLLO_CLIENT_FPS=144 APOLLO_APP_STATUS=RUNNING pwsh -File sk_config.ps1 144hz_vrr``
+  - Windows (PowerShell): ``$env:APOLLO_CLIENT_FPS='240'; $env:APOLLO_APP_STATUS='RUNNING'; pwsh -File sk_config.ps1 240hz_vrr -apollo -Verbose``
+  - Cross-platform (pwsh): ``APOLLO_CLIENT_FPS=144 APOLLO_APP_STATUS=RUNNING pwsh -File sk_config.ps1 144hz_vrr -apollo``
 - Notes:
+  - Overrides do not occur unless `-apollo` is used.
   - If `APOLLO_CLIENT_FPS` is unset or empty, no override occurs.
   - If `APOLLO_APP_STATUS` is `TERMINATING`, no override occurs even if `APOLLO_CLIENT_FPS` is set.
   - `-Verbose` will show the processed value for `TargetFPS` after any override.
 
 ## Apollo Dynamic Profile
 - Purpose: Allow per-device profile selection using a UUID supplied by Apollo without changing invocation.
+- Gating: Requires the `-apollo` switch.
 - Variables:
   - `$apolloUUID` (from env `APOLLO_CLIENT_UUID`): Device identifier appended to `apollo_`.
 - Behavior:
-  - When the script is invoked with `ProfileName` = `apollo_dynamic` and `$apolloUUID` is not null, the script rewrites `ProfileName` to `"apollo_$apolloUUID"` before loading `config.json`.
+  - When `-apollo` is supplied and `$apolloUUID` is set, the script prefers a matching `apollo_<UUID>` profile from `config.json`; if present, it overrides the provided `ProfileName`.
   - Users must define matching keys in `config.json` (e.g., `"apollo_<UUID>"`).
 - Examples:
-  - Windows (PowerShell): ``$env:APOLLO_CLIENT_UUID='5A900E30-EDB2-6C28-770D-BB4AEE67B196'; pwsh -File sk_config.ps1 apollo_dynamic -Verbose``
-  - Cross-platform (pwsh): ``APOLLO_CLIENT_UUID=5A900E30-EDB2-6C28-770D-BB4AEE67B196 pwsh -File sk_config.ps1 apollo_dynamic``
+  - Windows (PowerShell): ``$env:APOLLO_CLIENT_UUID='5A900E30-EDB2-6C28-770D-BB4AEE67B196'; pwsh -File sk_config.ps1 240hz_vrr -apollo -Verbose``
+  - Cross-platform (pwsh): ``APOLLO_CLIENT_UUID=5A900E30-EDB2-6C28-770D-BB4AEE67B196 pwsh -File sk_config.ps1 144hz_vrr -apollo``
 - Notes:
-  - If `APOLLO_CLIENT_UUID` is unset, no rewrite occurs; a literal `apollo_dynamic` profile would be required in `config.json`.
+  - If `APOLLO_CLIENT_UUID` is unset or no matching profile exists, the provided `ProfileName` is used as-is.
   - Pair with the FPS override variables to drive both selection and `TargetFPS` at runtime.
