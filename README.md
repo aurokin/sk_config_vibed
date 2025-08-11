@@ -30,21 +30,24 @@ See `config.example.json` for a full example. Each top-level property is a profi
 ```json
 {
   "240hz_vrr": {
-    "global": [
-      { "key": "FontScale", "value": "1.0" }
-    ],
+    "global": [{ "key": "FontScale", "value": "1.0" }],
     "profile": [
       { "key": "TargetFPS", "value": "222.872238" },
       { "key": "LimitEnforcementPolicy", "value": "4" }
     ]
   },
   "144hz_vrr": {
-    "global": [
-      { "key": "FontScale", "value": "1.5" }
-    ],
+    "global": [{ "key": "FontScale", "value": "1.5" }],
     "profile": [
       { "key": "TargetFPS", "value": "137.000000" },
       { "key": "LimitEnforcementPolicy", "value": "4" }
+    ]
+  },
+  "120hz_stream": {
+    "global": [{ "key": "FontScale", "value": "2.0" }],
+    "profile": [
+      { "key": "TargetFPS", "value": "120.000000" },
+      { "key": "LimitEnforcementPolicy", "value": "2" }
     ]
   }
 }
