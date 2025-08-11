@@ -39,3 +39,18 @@
 - Use `-WhatIf` before running on real profiles to prevent accidental edits.
 - The script edits INI files under `%LOCALAPPDATA%\\Programs\\Special K`; ensure you have backups or versioned copies.
 
+## Apollo Environment Overrides
+- Purpose: Allow external orchestration to dynamically override `TargetFPS` without changing `config.json`.
+- Variables:
+  - `$apolloFPS` (from env `APOLLO_CLIENT_FPS`): When set, replaces any `TargetFPS` value being written.
+  - `$apolloStatus` (from env `APOLLO_APP_STATUS`): Guards overrides; when status is `TERMINATING` (case-insensitive), the override is skipped.
+- Behavior:
+  - In `Update-IniFileByPartialKey`, when `key == "TargetFPS"` and `$apolloFPS` is non-null and `$apolloStatus` is not `TERMINATING`, the script writes `$apolloFPS` as the value.
+  - Applies to both Global `osd.ini` and per-profile `SpecialK.ini` writes.
+- Examples:
+  - Windows (PowerShell): ``$env:APOLLO_CLIENT_FPS = '240'; $env:APOLLO_APP_STATUS = 'RUNNING'; pwsh -File sk_config.ps1 240hz_vrr -Verbose``
+  - Cross-platform (pwsh): ``APOLLO_CLIENT_FPS=144 APOLLO_APP_STATUS=RUNNING pwsh -File sk_config.ps1 144hz_vrr``
+- Notes:
+  - If `APOLLO_CLIENT_FPS` is unset or empty, no override occurs.
+  - If `APOLLO_APP_STATUS` is `TERMINATING`, no override occurs even if `APOLLO_CLIENT_FPS` is set.
+  - `-Verbose` will show the processed value for `TargetFPS` after any override.

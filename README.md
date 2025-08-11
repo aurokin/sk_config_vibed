@@ -64,3 +64,24 @@ Values are written exactly as strings into INI lines like `Key=Value`.
 - Backup your INIs before large changes.
 
 Enjoy smoother profiles! 🕹️💨
+
+## 🌐 Environment Overrides (Apollo)
+For runtime-controlled FPS caps, the script can override `TargetFPS` using environment variables commonly provided by an external orchestrator ("Apollo").
+
+- `APOLLO_CLIENT_FPS` → `$apolloFPS`: When set, this value replaces any `TargetFPS` from `config.json`.
+- `APOLLO_APP_STATUS` → `$apolloStatus`: When set to `TERMINATING` (case-insensitive), the override is disabled to avoid last‑minute changes.
+
+Behavior
+- If `APOLLO_CLIENT_FPS` is set and `APOLLO_APP_STATUS` is not `TERMINATING`, `TargetFPS` is written using `APOLLO_CLIENT_FPS`.
+- Applies to both Global `osd.ini` and all `SpecialK.ini` files under Profiles.
+
+Examples
+- Windows (PowerShell):
+  - ``$env:APOLLO_CLIENT_FPS = '240'; $env:APOLLO_APP_STATUS = 'RUNNING'; pwsh -File sk_config.ps1 240hz_vrr -Verbose``
+- Cross-platform (pwsh/macOS/Linux):
+  - ``APOLLO_CLIENT_FPS=144 APOLLO_APP_STATUS=RUNNING pwsh -File sk_config.ps1 144hz_vrr -Verbose``
+
+Notes
+- If `APOLLO_CLIENT_FPS` is unset or empty, no override occurs.
+- If `APOLLO_APP_STATUS` is `TERMINATING`, no override occurs even if `APOLLO_CLIENT_FPS` is set.
+- `-Verbose` logs show the final value processed for `TargetFPS` after any override.
