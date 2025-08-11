@@ -9,6 +9,7 @@ Param(
 
 $ErrorActionPreference = 'Stop'
 $apolloFPS = $env:APOLLO_CLIENT_FPS
+$apolloStatus = $env:APOLLO_APP_STATUS
 
 function Convert-ToHashtableFromArray {
   param(
@@ -43,7 +44,7 @@ function Update-IniFileByPartialKey {
 
   foreach ($key in $KeyValues.Keys) {
     $value = $KeyValues[$key]
-    if ($key -eq "TargetFPS" -and $apolloFPS -ne $null) {
+    if ($key -eq "TargetFPS" -and $apolloFPS -ne $null -and $apolloStatus -ne 'TERMINATING') {
       $value = $apolloFPS
     }
     $newLine = "$key=$value"
